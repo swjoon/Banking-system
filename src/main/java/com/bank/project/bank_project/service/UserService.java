@@ -34,6 +34,8 @@ public class UserService {
 			throw new CustomApiException("동일한 아이디가 존재합니다");
 		}
 		
+		log.info("회원가입성공");
+		
 		User newUser = userRepository.save(joinReqDto.toEntity(bCryptPasswordEncoder));
 		
 		return new JoinResDto(newUser);
