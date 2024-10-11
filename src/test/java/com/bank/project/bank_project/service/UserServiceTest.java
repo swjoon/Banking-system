@@ -35,7 +35,7 @@ public class UserServiceTest {
 	public void 회원가입_test() throws Exception{
 		// given
 		
-		JoinReqDto joinReqDto = JoinReqDto.builder().username("testuser").password("1234").email("email@test.com").fullname("테스트").build();
+		JoinReqDto joinReqDto = JoinReqDto.builder().username("testuser").password("12345678").email("email@test.com").fullname("테스트").build();
 		
 		// stub 1
 		when(userRepository.findByUsername(any())).thenReturn(Optional.empty());
