@@ -35,7 +35,7 @@ public class JwtAuthorizationFilterTest {
         String jwtToken = JwtProcess.create(loginUser);
 
         // when
-        ResultActions resultActions = mvc.perform(get("/api/s/test").header(JwtVO.HEADER, jwtToken));
+        ResultActions resultActions = mvc.perform(get("/api/test/test").header(JwtVO.HEADER, jwtToken));
 
         // then
         resultActions.andExpect(status().isNotFound());
@@ -47,7 +47,7 @@ public class JwtAuthorizationFilterTest {
         // given
 
         // when
-        ResultActions resultActions = mvc.perform(get("/api/s/test"));
+        ResultActions resultActions = mvc.perform(get("/api/test/test"));
 
         // then
         resultActions.andExpect(status().isUnauthorized()); // 401

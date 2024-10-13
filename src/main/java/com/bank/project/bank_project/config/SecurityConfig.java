@@ -59,7 +59,7 @@ public class SecurityConfig {
 					CustomResponseUtil.fail(response, "권한이 없습니다",HttpStatus.FORBIDDEN);
 				}))
 				
-				.authorizeHttpRequests(request -> request.requestMatchers("/api/s/**").authenticated()
+				.authorizeHttpRequests(request -> request.requestMatchers("/api/test/**").authenticated()
 						.requestMatchers("/api/admin/**").hasRole("" + UserEnum.ADMIN).anyRequest().permitAll());
 
 		return http.build();

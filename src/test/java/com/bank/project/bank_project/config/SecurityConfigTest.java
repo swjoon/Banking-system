@@ -28,7 +28,7 @@ public class SecurityConfigTest {
 		
 		
 		// when
-		ResultActions resultActions = mvc.perform(get("/api/s/test"));
+		ResultActions resultActions = mvc.perform(get("/api/test/test"));
         String responseBody = resultActions.andReturn().getResponse().getContentAsString();
         int httpStatusCode = resultActions.andReturn().getResponse().getStatus();
         System.out.println("테스트 : " + responseBody);
