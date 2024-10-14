@@ -14,6 +14,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -26,7 +27,8 @@ import jakarta.transaction.Transactional;
 
 //SpringBootTest 하는 곳에는 전부다 teardown.sql 을 붙여주자.
 //@Sql("classpath:db/teardown.sql") // 실행시점 : BeforeEach 실행 직전마다
-@Transactional
+//@Transactional
+@Sql("classpath:db/teardown.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)

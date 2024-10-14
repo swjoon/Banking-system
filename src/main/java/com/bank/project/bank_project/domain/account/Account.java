@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import com.bank.project.bank_project.domain.user.User;
+import com.bank.project.bank_project.handler.ex.CustomApiException;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,19 +35,19 @@ public class Account {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	
+
 	@Column(unique = true, nullable = false, length = 10)
 	private Long number;
-	
+
 	@Column(nullable = false, length = 4)
 	private Long password;
-	
+
 	@Column(nullable = false)
 	private Long balance;
-	
+
 	@ManyToOne(fetch = FetchType.LAZY)
 	private User user;
-	
+
 	@CreatedDate
 	@Column(nullable = false)
 	private LocalDateTime createdAt;
@@ -54,4 +55,11 @@ public class Account {
 	@LastModifiedDate
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
+
+	public void checkOwner(Long userId) {
+		if (user.getId() != userId) { // Lazy 로딩어이어도 id를 조회할 때는 select 쿼리가 날라가지 않는다.
+			throw new CustomApiException("계좌 소유자가 아닙니다.");
+		}
+	}
+
 }

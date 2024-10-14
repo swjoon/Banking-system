@@ -2,9 +2,7 @@ package com.bank.project.bank_project.controller;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -17,18 +15,23 @@ import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import com.bank.project.bank_project.config.dummy.DummyObject;
+import com.bank.project.bank_project.domain.account.Account;
+import com.bank.project.bank_project.domain.user.User;
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountSaveReqDto;
+import com.bank.project.bank_project.handler.ex.CustomApiException;
 import com.bank.project.bank_project.repository.AccountRepository;
 import com.bank.project.bank_project.repository.UserRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import jakarta.transaction.Transactional;
+import jakarta.persistence.EntityManager;
 
-@Transactional
+//@Transactional
+@Sql("classpath:db/teardown.sql")
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @SpringBootTest(webEnvironment = WebEnvironment.MOCK)
@@ -39,6 +42,9 @@ public class AccountControllerTest extends DummyObject {
 
 	@Autowired
 	private ObjectMapper om;
+	
+	@Autowired
+	private EntityManager em;
 
 	@Autowired
 	private UserRepository userRepository;
@@ -48,13 +54,17 @@ public class AccountControllerTest extends DummyObject {
 
 	@BeforeEach
 	public void setUp() {
-		userRepository.save(newUser("test", "테스트"));
+		User test1 = userRepository.save(newUser("test1", "테스트1"));
+		User test2 = userRepository.save(newUser("test2", "테스트2"));
+		Account account1 = accountRepository.save(newAccount(1111L, test1));
+		Account account2 = accountRepository.save(newAccount(2222L, test2));
+		em.clear();
 	}
 
 	// jwt token -> 인증필터 -> 시큐리티 세션생성
-    // setupBefore=TEST_METHOD (setUp 메서드 실행전에 수행)
-    // setupBefore=TEST_EXECUTION (saveAccount_test 메서드 실행전에 수행)
-	@WithUserDetails(value = "test", setupBefore = TestExecutionEvent.TEST_EXECUTION)// 디비에서 value 값을 조회해서 세션에 담아줌
+	// setupBefore=TEST_METHOD (setUp 메서드 실행전에 수행)
+	// setupBefore=TEST_EXECUTION (saveAccount_test 메서드 실행전에 수행)
+	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION) // 디비에서 value 값을 조회해서 세션에 담아줌
 	@Test
 	public void saveAccount_test() throws Exception {
 		// given
@@ -71,7 +81,38 @@ public class AccountControllerTest extends DummyObject {
 		System.out.println("테스트 : " + responseBody);
 
 		// then
-        resultActions.andExpect(status().isCreated());
+		resultActions.andExpect(status().isCreated());
 	}
 
+//	@WithUserDetails(value = "test", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+//	@Test
+//	public void findUserAccount_test() throws Exception {
+//		// given
+//		Long id = 1L;
+//		// when
+//		ResultActions resultActions = mvc.perform(get("/api/test/account/" + id));
+//		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+//		System.out.println("테스트 : " + responseBody);
+//
+//		// then
+//		resultActions.andExpect(status().isOk());
+//	}
+
+	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+	@Test
+	public void deleteAccount_test() throws Exception {
+		// given
+		Long number = 1111L;
+
+		// when
+		ResultActions resultActions = mvc.perform(delete("/api/test/account/" + number));
+		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("테스트 : " + responseBody);
+
+		// then
+		// Junit 테스트에서 delete 쿼리 로그는 DB관련(DML)으로 가장 마지막에 실행되면 발동안됨.
+		assertThrows(CustomApiException.class, () -> accountRepository.findByNumber(number)
+				.orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다")));
+
+	}
 }
