@@ -2,6 +2,7 @@ package com.bank.project.bank_project.controller;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -22,7 +23,10 @@ import org.springframework.test.web.servlet.ResultActions;
 import com.bank.project.bank_project.config.dummy.DummyObject;
 import com.bank.project.bank_project.domain.account.Account;
 import com.bank.project.bank_project.domain.user.User;
+import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountDepositReqDto;
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountSaveReqDto;
+import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountTransferReqDto;
+import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountWithdrawReqDto;
 import com.bank.project.bank_project.handler.ex.CustomApiException;
 import com.bank.project.bank_project.repository.AccountRepository;
 import com.bank.project.bank_project.repository.UserRepository;
@@ -42,7 +46,7 @@ public class AccountControllerTest extends DummyObject {
 
 	@Autowired
 	private ObjectMapper om;
-	
+
 	@Autowired
 	private EntityManager em;
 
@@ -84,19 +88,19 @@ public class AccountControllerTest extends DummyObject {
 		resultActions.andExpect(status().isCreated());
 	}
 
-//	@WithUserDetails(value = "test", setupBefore = TestExecutionEvent.TEST_EXECUTION)
-//	@Test
-//	public void findUserAccount_test() throws Exception {
-//		// given
-//		Long id = 1L;
-//		// when
-//		ResultActions resultActions = mvc.perform(get("/api/test/account/" + id));
-//		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
-//		System.out.println("테스트 : " + responseBody);
-//
-//		// then
-//		resultActions.andExpect(status().isOk());
-//	}
+	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+	@Test
+	public void findUserAccount_test() throws Exception {
+		// given
+		Long id = 1L;
+		// when
+		ResultActions resultActions = mvc.perform(get("/api/test/account/" + id));
+		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("테스트 : " + responseBody);
+
+		// then
+		resultActions.andExpect(status().isOk());
+	}
 
 	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
 	@Test
@@ -115,4 +119,74 @@ public class AccountControllerTest extends DummyObject {
 				.orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다")));
 
 	}
+
+	@Test
+	public void depositAccount_test() throws Exception {
+		// given
+		AccountDepositReqDto accountDepositReqDto = new AccountDepositReqDto();
+		accountDepositReqDto.setNumber(1111L);
+		accountDepositReqDto.setAmount(100L);
+		accountDepositReqDto.setType("DEPOSIT");
+		accountDepositReqDto.setTel("01012345678");
+
+		String requestBody = om.writeValueAsString(accountDepositReqDto);
+		System.out.println("테스트 : " + requestBody);
+
+		// when
+		ResultActions resultActions = mvc
+				.perform(post("/api/account/deposit").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("테스트 : " + responseBody);
+
+		// then
+		resultActions.andExpect(status().isCreated());
+	}
+
+	@Test
+	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+	public void withdrawAccount_test() throws Exception {
+		// given
+		AccountWithdrawReqDto accountWithdrawReqDto = new AccountWithdrawReqDto();
+		accountWithdrawReqDto.setNumber(1111L);
+		accountWithdrawReqDto.setPassword(1234L);
+		accountWithdrawReqDto.setAmount(100L);
+		accountWithdrawReqDto.setType("WITHDRAW");
+
+		String requestBody = om.writeValueAsString(accountWithdrawReqDto);
+		System.out.println("테스트 : " + requestBody);
+
+		// when
+		ResultActions resultActions = mvc
+				.perform(post("/api/account/withdraw").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("테스트 : " + responseBody);
+
+		// then
+		resultActions.andExpect(status().isCreated());
+	}
+
+	@Test
+	@WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
+	public void transferAccount_test() throws Exception {
+		// given
+		AccountTransferReqDto accountTransferReqDto = new AccountTransferReqDto();
+		accountTransferReqDto.setWithdrawNumber(1111L);
+		accountTransferReqDto.setDepositNumber(2222L);
+		accountTransferReqDto.setWithdrawPassword(1234L);
+		accountTransferReqDto.setAmount(100L);
+		accountTransferReqDto.setType("TRANSFER");
+
+		String requestBody = om.writeValueAsString(accountTransferReqDto);
+		System.out.println("테스트 : " + requestBody);
+
+		// when
+		ResultActions resultActions = mvc
+				.perform(post("/api/account/transfer").content(requestBody).contentType(MediaType.APPLICATION_JSON));
+		String responseBody = resultActions.andReturn().getResponse().getContentAsString();
+		System.out.println("테스트 : " + responseBody);
+
+		// then
+		resultActions.andExpect(status().isCreated());
+	}
+
 }

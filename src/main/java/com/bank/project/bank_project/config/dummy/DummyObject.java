@@ -5,8 +5,11 @@ import java.time.LocalDateTime;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import com.bank.project.bank_project.domain.account.Account;
+import com.bank.project.bank_project.domain.transaction.Transaction;
+import com.bank.project.bank_project.domain.transaction.TransactionEnum;
 import com.bank.project.bank_project.domain.user.User;
 import com.bank.project.bank_project.domain.user.UserEnum;
+import com.bank.project.bank_project.repository.AccountRepository;
 
 public class DummyObject {
 	
@@ -74,5 +77,44 @@ public class DummyObject {
 	                .createdAt(LocalDateTime.now())
 	                .updatedAt(LocalDateTime.now())
 	                .build();
+	    }
+	 
+	 protected Transaction newDepositTransaction(Account account, AccountRepository accountRepository) {
+	        account.deposit(100L); // 1000원이 있었다면 900원이 됨
+	        // 더티체킹이 안되기 때문에
+	        if (accountRepository != null) {
+	            accountRepository.save(account);
+	        }
+	        Transaction transaction = Transaction.builder()
+	                .withdrawAccount(null)
+	                .depositAccount(account)
+	                .withdrawAccountBalance(null)
+	                .depositAccountBalance(account.getBalance())
+	                .amount(100L)
+	                .type(TransactionEnum.DEPOSIT)
+	                .sender("ATM")
+	                .receiver(account.getNumber() + "")
+	                .tel("01022227777")
+	                .build();
+	        return transaction;
+	    }
+	 
+	 protected static Transaction newMockDepositTransaction(Long id, Account account) {
+	        account.deposit(100L);
+	        Transaction transaction = Transaction.builder()
+	                .id(id)
+	                .withdrawAccount(null)
+	                .depositAccount(account)
+	                .withdrawAccountBalance(null)
+	                .depositAccountBalance(account.getBalance())
+	                .amount(100L)
+	                .type(TransactionEnum.DEPOSIT)
+	                .sender("ATM")
+	                .receiver(account.getNumber() + "")
+	                .tel("01012345678")
+	                .createdAt(LocalDateTime.now())
+	                .updatedAt(LocalDateTime.now())
+	                .build();
+	        return transaction;
 	    }
 }

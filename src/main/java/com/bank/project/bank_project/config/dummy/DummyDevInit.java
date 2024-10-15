@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
+import com.bank.project.bank_project.domain.account.Account;
 import com.bank.project.bank_project.domain.user.User;
 import com.bank.project.bank_project.repository.AccountRepository;
 import com.bank.project.bank_project.repository.UserRepository;
@@ -17,8 +18,11 @@ public class DummyDevInit extends DummyObject {
     CommandLineRunner init(UserRepository userRepository, AccountRepository accountRepository) {
         return (args) -> {
             // 서버 실행시에 무조건 실행된다.
-            User ssar = userRepository.save(newUser("test", "테스트"));
+            User test = userRepository.save(newUser("test", "테스트"));
             User admin = userRepository.save(newUser("admin", "관리자"));
+            
+            Account testAccount = accountRepository.save(newAccount(1111000011L, test));
+            Account adminAccount = accountRepository.save(newAccount(2222000022L, admin));
  
         };
     }

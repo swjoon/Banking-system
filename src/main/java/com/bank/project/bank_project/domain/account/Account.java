@@ -56,9 +56,30 @@ public class Account {
 	@Column(nullable = false)
 	private LocalDateTime updatedAt;
 
+	public void deposit(Long amount) {
+		balance = balance + amount;
+	}
+	
+	public void withdraw(Long amount) {
+		checkBalance(amount);
+		balance -= amount;
+	}
+
 	public void checkOwner(Long userId) {
-		if (user.getId() != userId) { // Lazy 로딩어이어도 id를 조회할 때는 select 쿼리가 날라가지 않는다.
+		if (user.getId().longValue() != userId.longValue()) { // Lazy 로딩어이어도 id를 조회할 때는 select 쿼리가 날라가지 않는다.
 			throw new CustomApiException("계좌 소유자가 아닙니다.");
+		}
+	}
+
+	public void checkPassword(Long password) {
+		if(this.password.longValue() != password.longValue()) {
+			throw new CustomApiException("계좌 비밀번호가 일치하지 않습니다.");
+		}
+	}
+
+	public void checkBalance(Long amount) {
+		if(this.balance.longValue() < amount.longValue()) {
+			throw new CustomApiException("계좌 잔액이 부족합니다.");
 		}
 	}
 
