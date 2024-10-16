@@ -21,8 +21,8 @@ import com.bank.project.bank_project.dto.Account.AccountResDto.AccountTransferRe
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountWithdrawResDto;
 import com.bank.project.bank_project.handler.ex.CustomApiException;
 import com.bank.project.bank_project.repository.AccountRepository;
-import com.bank.project.bank_project.repository.TransactionRepository;
 import com.bank.project.bank_project.repository.UserRepository;
+import com.bank.project.bank_project.repository.transaction.TransactionRepository;
 
 import lombok.RequiredArgsConstructor;
 

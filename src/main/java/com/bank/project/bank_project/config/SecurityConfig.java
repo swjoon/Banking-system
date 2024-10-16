@@ -76,7 +76,7 @@ public class SecurityConfig {
 		configuration.addAllowedMethod("*"); // GET, POST ..
 		configuration.addAllowedOrigin("*"); // IP
 		configuration.setAllowCredentials(true); // 클라이언트에서 쿠키 요청 허용
-
+		configuration.addExposedHeader("Authorization"); // 옛날에는 default
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 

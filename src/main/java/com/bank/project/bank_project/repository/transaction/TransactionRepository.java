@@ -1,4 +1,4 @@
-package com.bank.project.bank_project.repository;
+package com.bank.project.bank_project.repository.transaction;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

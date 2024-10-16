@@ -28,8 +28,8 @@ import com.bank.project.bank_project.dto.Account.AccountResDto.AccountListResDto
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountSaveResDto;
 import com.bank.project.bank_project.handler.ex.CustomApiException;
 import com.bank.project.bank_project.repository.AccountRepository;
-import com.bank.project.bank_project.repository.TransactionRepository;
 import com.bank.project.bank_project.repository.UserRepository;
+import com.bank.project.bank_project.repository.transaction.TransactionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @ExtendWith(MockitoExtension.class)
