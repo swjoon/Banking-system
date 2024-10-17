@@ -15,6 +15,7 @@ import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountSaveReqDto
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountTransferReqDto;
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountWithdrawReqDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountDepositResDto;
+import com.bank.project.bank_project.dto.Account.AccountResDto.AccountDetailResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountListResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountSaveResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountTransferResDto;
@@ -129,19 +130,20 @@ public class AccountService {
 				.withdrawAccountBalance(withdrawAccountPS.getBalance()).depositAccountBalance(null)
 				.amount(accountWithdrawReqDto.getAmount()).type(TransactionEnum.WITHDRAW)
 				.sender(accountWithdrawReqDto.getNumber() + "").receiver("ATM").build();
-		
+
 		Transaction transactionPS = transactionRepository.save(transaction);
-		
+
 		return new AccountWithdrawResDto(withdrawAccountPS, transactionPS);
 	}
-	
+
 	@Transactional
 	public AccountTransferResDto 계좌이체(AccountTransferReqDto accountTransferReqDto, Long userId) {
 		// 1. 출금 계좌와 입금 계좌 동일 여부 체크
-		if(accountTransferReqDto.getWithdrawNumber().longValue() == accountTransferReqDto.getDepositNumber().longValue()) {
+		if (accountTransferReqDto.getWithdrawNumber().longValue() == accountTransferReqDto.getDepositNumber()
+				.longValue()) {
 			throw new CustomApiException("입금계좌와 출금계좌가 동일합니다.");
 		}
-		
+
 		// 2. 출금 금액 확인
 		if (accountTransferReqDto.getAmount() <= 0L) {
 			throw new CustomApiException("0원 이하의 금액을 출금할 수 없습니다.");
@@ -150,7 +152,7 @@ public class AccountService {
 		// 3. 계좌 존재여부 확인
 		Account withdrawAccountPS = accountRepository.findByNumber(accountTransferReqDto.getWithdrawNumber())
 				.orElseThrow(() -> new CustomApiException("출금 계좌를 찾을 수 없습니다."));
-		
+
 		Account depositAccountPS = accountRepository.findByNumber(accountTransferReqDto.getDepositNumber())
 				.orElseThrow(() -> new CustomApiException("입금 계좌를 찾을 수 없습니다."));
 
@@ -168,14 +170,27 @@ public class AccountService {
 		depositAccountPS.deposit(accountTransferReqDto.getAmount());
 
 		// 8. 거래내역 남기기
-		Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccountPS).depositAccount(depositAccountPS)
-				.withdrawAccountBalance(withdrawAccountPS.getBalance()).depositAccountBalance(depositAccountPS.getBalance())
-				.amount(accountTransferReqDto.getAmount()).type(TransactionEnum.WITHDRAW)
-				.sender(accountTransferReqDto.getWithdrawNumber() + "").receiver(accountTransferReqDto.getDepositNumber()+"").build();
-		
+		Transaction transaction = Transaction.builder().withdrawAccount(withdrawAccountPS)
+				.depositAccount(depositAccountPS).withdrawAccountBalance(withdrawAccountPS.getBalance())
+				.depositAccountBalance(depositAccountPS.getBalance()).amount(accountTransferReqDto.getAmount())
+				.type(TransactionEnum.WITHDRAW).sender(accountTransferReqDto.getWithdrawNumber() + "")
+				.receiver(accountTransferReqDto.getDepositNumber() + "").build();
+
 		Transaction transactionPS = transactionRepository.save(transaction);
 
 		return new AccountTransferResDto(withdrawAccountPS, transactionPS);
+	}
+
+	public AccountDetailResDto 계좌상세보기(Long userId, Long number, Integer page) {
+
+		Account accountPS = accountRepository.findByNumber(number)
+				.orElseThrow(() -> new CustomApiException("계좌를 찾을 수 없습니다."));
+
+		accountPS.checkOwner(userId);
+
+		List<Transaction> transactionList = transactionRepository.findTransactionList(accountPS.getId(), "ALL", page);
+
+		return new AccountDetailResDto(accountPS, transactionList);
 	}
 
 }

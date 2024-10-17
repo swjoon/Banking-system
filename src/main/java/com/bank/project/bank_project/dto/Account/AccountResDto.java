@@ -8,6 +8,7 @@ import com.bank.project.bank_project.domain.account.Account;
 import com.bank.project.bank_project.domain.transaction.Transaction;
 import com.bank.project.bank_project.domain.user.User;
 import com.bank.project.bank_project.dto.transaction.TransactionResDto.TransactionDepositDto;
+import com.bank.project.bank_project.dto.transaction.TransactionResDto.TransactionDto;
 import com.bank.project.bank_project.dto.transaction.TransactionResDto.TransactionTransferDto;
 import com.bank.project.bank_project.dto.transaction.TransactionResDto.TransactionWithdrawDto;
 
@@ -61,6 +62,7 @@ public class AccountResDto {
 	// 계좌 입금
 	@Data
 	public static class AccountDepositResDto {
+
 		private Long id; // 계좌 ID
 		private Long number; // 계좌번호
 		private TransactionDepositDto transaction;
@@ -71,10 +73,11 @@ public class AccountResDto {
 			this.transaction = new TransactionDepositDto(transaction);
 		}
 	}
-	
+
 	// 계좌 출금
 	@Data
 	public static class AccountWithdrawResDto {
+
 		private Long id; // 계좌 ID
 		private Long number; // 계좌번호
 		private Long balance; // 잔액
@@ -87,9 +90,10 @@ public class AccountResDto {
 			this.transaction = new TransactionWithdrawDto(transaction);
 		}
 	}
-	
+
 	@Data
 	public static class AccountTransferResDto {
+
 		private Long id; // 계좌 ID
 		private Long number; // 계좌번호
 		private Long balance; // 잔액
@@ -100,6 +104,25 @@ public class AccountResDto {
 			this.number = account.getNumber();
 			this.balance = account.getBalance();
 			this.transaction = new TransactionTransferDto(transaction);
+		}
+	}
+
+	// 계좌 정보 불러오기. ( 거래내역 포함 )
+	@Data 
+	public static class AccountDetailResDto {
+
+		private Long id; // 계좌 ID
+		private Long number; // 계좌번호
+		private Long balance; // 잔액
+		private List<TransactionDto> transactions = new ArrayList<>();
+
+		public AccountDetailResDto(Account account, List<Transaction> transactions) {
+			this.id = account.getId();
+			this.number = account.getNumber();
+			this.balance = account.getBalance();
+			this.transactions = transactions.stream()
+					.map((transaction) -> new TransactionDto(transaction, account.getNumber()))
+					.collect(Collectors.toList());
 		}
 	}
 }

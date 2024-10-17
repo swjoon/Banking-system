@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.bank.project.bank_project.config.auth.LoginUser;
@@ -19,6 +20,7 @@ import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountSaveReqDto
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountTransferReqDto;
 import com.bank.project.bank_project.dto.Account.AccountReqDto.AccountWithdrawReqDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountDepositResDto;
+import com.bank.project.bank_project.dto.Account.AccountResDto.AccountDetailResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountListResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountSaveResDto;
 import com.bank.project.bank_project.dto.Account.AccountResDto.AccountTransferResDto;
@@ -57,37 +59,49 @@ public class AccountController {
 	@DeleteMapping("/test/account/{number}")
 	public ResponseEntity<?> deleteAccount(@PathVariable("number") Long number,
 			@AuthenticationPrincipal LoginUser loginUser) {
-		
+
 		accountService.계좌삭제(number, loginUser.getUser().getId());
-		
+
 		return new ResponseEntity<>(new ResponseDto<>(1, "계좌 삭제 완료.", null), HttpStatus.OK);
 	}
 
 	@PostMapping("/account/deposit")
 	public ResponseEntity<?> depositAccount(@RequestBody @Valid AccountDepositReqDto accountDepositReqDto,
 			BindingResult bindingResult) {
-		
+
 		AccountDepositResDto accountDepositRespDto = accountService.계좌입금(accountDepositReqDto);
-		
+
 		return new ResponseEntity<>(new ResponseDto<>(1, "계좌 입금 완료", accountDepositRespDto), HttpStatus.CREATED);
 	}
-	
+
 	@PostMapping("/account/withdraw")
 	public ResponseEntity<?> withdrawAccount(@RequestBody @Valid AccountWithdrawReqDto accountWithdrawReqDto,
 			BindingResult bindingResult, @AuthenticationPrincipal LoginUser loginUser) {
-		
-		AccountWithdrawResDto accountWithdrawRespDto = accountService.계좌출금(accountWithdrawReqDto, loginUser.getUser().getId());
-		
+
+		AccountWithdrawResDto accountWithdrawRespDto = accountService.계좌출금(accountWithdrawReqDto,
+				loginUser.getUser().getId());
+
 		return new ResponseEntity<>(new ResponseDto<>(1, "계좌 출금 완료", accountWithdrawRespDto), HttpStatus.CREATED);
 	}
-	
+
 	@PostMapping("/account/transfer")
 	public ResponseEntity<?> withdrawAccount(@RequestBody @Valid AccountTransferReqDto accountTransferReqDto,
 			BindingResult bindingResult, @AuthenticationPrincipal LoginUser loginUser) {
-		
-		AccountTransferResDto accountTransferResDto = accountService.계좌이체(accountTransferReqDto, loginUser.getUser().getId());
-		
+
+		AccountTransferResDto accountTransferResDto = accountService.계좌이체(accountTransferReqDto,
+				loginUser.getUser().getId());
+
 		return new ResponseEntity<>(new ResponseDto<>(1, "계좌 이체 완료", accountTransferResDto), HttpStatus.CREATED);
+	}
+
+	@GetMapping("/test/account/detail/{number}")
+	public ResponseEntity<?> findDetailAccount(@PathVariable("number") Long number,
+			@RequestParam(value = "page", defaultValue = "0") Integer page,
+			@AuthenticationPrincipal LoginUser loginUser) {
+
+		AccountDetailResDto accountDetailResDto = accountService.계좌상세보기(loginUser.getUser().getId(), number, page);
+		
+		return ResponseEntity.ok(new ResponseDto<>(1, "계좌 거래내역 불러오기 성공", accountDetailResDto));
 	}
 
 }
